@@ -1,21 +1,55 @@
-all: numcheckseq numcheckdatapar numcheckfuncpar 
+IDIR=lib
+CC=gcc
+CFLAGS=-g -Wall -lpthread -I$(IDIR)
+DFLAGS=-g -Wall -lpthread -I$(IDIR)
+FFLAGS=-g -Wall -lpthread -I$(IDIR)
+# TFLAGS=-g -Wall -I$(IDIR)
 
-clean: 
-	/bin/rm -f *.o numcheckseq
+ODIR=obj
+SDIR=src
 
-# vcoê deve criar as regras para gerar os dois outros programas.
+TARGET_SEQ=seq
+_DEPS = conditions.h numchecks.h timediff.h
+DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-numcheckseq: conditions.o numchecks.o timediff.o numcheckseq.o
-	gcc -Wall conditions.o numchecks.o timediff.o numcheckseq.o -o numcheckseq
+_OBJ = conditions.o numchecks.o timediff.o numcheckseq.o
+OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-numcheckseq.o: numcheckseq.c conditions.h numchecks.h timediff.h
-	gcc -Wall -c numcheckseq.c
 
-conditions.o: conditions.c conditions.h
-	gcc -Wall -c conditions.c
+#data parallelism
+TARGET_DATA=data
 
-numchecks.o: numchecks.c numchecks.h
-	gcc -Wall -c numchecks.c
+_DEPS_DATA = conditions.h numchecks.h timediff.h
+DEPS_DATA = $(patsubst %,$(IDIR)/%,$(_DEPS_DATA))
 
-timediff.o: timediff.c timediff.h
-	gcc -Wall -c timediff.c
+_OBJ_DATA = conditions.o numchecks.o timediff.o numcheckdatapar.o
+OBJ_DATA = $(patsubst %,$(ODIR)/%,$(_OBJ_DATA))
+
+# #functional parallelism
+# TARGET_FUNC=numcheckfuncpar
+
+# _DEPS_FUNC = oven-queue.hpp
+# DEPS_FUNC = $(patsubst %,$(IDIR)/%,$(_DEPS_FUNC))
+
+# _OBJ_FUNC = oven-queue.o test.o
+# OBJ_FUNC = $(patsubst %,$(ODIR)/%,$(_OBJ_FUNC))
+
+$(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(TARGET_SEQ): $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+data:
+$(ODIR)/%.o: $(SDIR)/%.c $(DEPS_DATA)
+	$(CC) -c -o $@ $< $(DFLAGS)
+$(TARGET_DATA): $(OBJ_DATA)
+	$(CC) -o $@ $^ $(DFLAGS)
+
+
+.PHONY: clean
+
+clean:
+	rm -f $(ODIR)/*.o
+	rm -f $(TARGET)
+	rm -f $(TESTER) 2> /dev/null
