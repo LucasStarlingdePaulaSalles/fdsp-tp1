@@ -69,21 +69,14 @@ int main( int argc, char* argv[] )
     // Note que o valor do parâmetro maxnum é considerado inclusive (<=)
     gettimeofday(&t1,NULL);
     long quota = maxnum/thread_count;
-    printf("Quota%ld\n",quota);
     for(thread = 0; thread < thread_count-1; ++thread){
-        printf("Thread:%ld\n",thread);
-        printf("From:%ld\n",thread*quota);
-        printf("To:%ld\n",thread*quota + quota);
         struct range *param;
         param = malloc(sizeof(param));
         param->from = thread*quota;
-        param->to = thread*quota + quota;
+        param->to = thread*quota + quota-1;
         param->ndigits = ndigits;
         pthread_create(&thread_handles[thread], NULL, check_range, (void*) param);
     }
-    printf("Thread:%ld\n",thread);
-    printf("From:%ld\n",thread*quota);
-    printf("To:%ld\n",maxnum);
     struct range *param;
     param = malloc(sizeof(param));
     param->from = thread*quota;
