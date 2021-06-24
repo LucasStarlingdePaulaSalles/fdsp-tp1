@@ -51,10 +51,6 @@ unsigned char filter = 5 << 5; //mascara para validar que o numero passou pelos 
 void count_up_checks(long n, int checked)
 {
     pthread_mutex_lock(&mutex);
-    if(n == 1000){
-     printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-
-    }
     bytes[n] += 1 << 5;
     bytes[n] += checked;
         // SIGNAL
