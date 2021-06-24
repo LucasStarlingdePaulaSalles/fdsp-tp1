@@ -54,7 +54,7 @@ int main( int argc, char* argv[] )
         exit(1);
     }
     maxnum = atol(argv[1]);
-    pthread_mutex_init(&mutex, NULL); // Declara o lock para o forno
+    pthread_mutex_init(&mutex, NULL); // ninicia o mutex
 
     // determinação de ndigits em função do maxnum
     tmp = maxnum;
