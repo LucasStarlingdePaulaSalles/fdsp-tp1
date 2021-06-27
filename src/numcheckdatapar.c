@@ -115,8 +115,8 @@ void check_num(long n, int ndigits)
     fou = has_four_repetitions( num, ndigits );
 
     // Para processar número de condições satisfeitas
-    pthread_mutex_lock(&mutex);
     all = pal + rep + sum + dou + fou;
+    pthread_mutex_lock(&mutex);
     if (all>0) {
         match_some_test += 1;
     }

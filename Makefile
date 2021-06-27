@@ -7,6 +7,7 @@ FFLAGS=-g -Wall -lpthread -I$(IDIR)
 
 ODIR=obj
 SDIR=src
+BDIR=bin
 
 TARGET_SEQ=seq
 _DEPS = conditions.h numchecks.h timediff.h
@@ -47,31 +48,31 @@ $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(TARGET_SEQ): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $(BDIR)/$@ $^ $(CFLAGS)
 
 data:
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS_DATA)
 	$(CC) -c -o $@ $< $(CFLAGS)
 $(TARGET_DATA): $(OBJ_DATA)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $(BDIR)/$@ $^ $(CFLAGS)
 
 func:
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS_FUNC)
 	$(CC) -c -o $@ $< $(CFLAGS)
 $(TARGET_FUNC): $(OBJ_FUNC)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $(BDIR)/$@ $^ $(CFLAGS)
 
 test:
 $(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS_T)
 	$(CC) -c -o $@ $< $(TFLAGS)
 $(TESTER): $(OBJ_T)
-	$(CC) -o $@ $^ $(TFLAGS)
+	$(CC) -o $(BDIR)/$@ $^ $(TFLAGS)
 
 .PHONY: clean
 
 clean:
 	rm -f $(ODIR)/*.o
-	rm -f $(TARGET_SEQ)  2> /dev/null
-	rm -f $(TARGET_DATA) 2> /dev/null
-	rm -f $(TARGET_FUNC) 2> /dev/null
-	rm -f $(TESTER) 2> /dev/null
+	rm -f $(BDIR)/$(TARGET_SEQ)  2> /dev/null
+	rm -f $(BDIR)/$(TARGET_DATA) 2> /dev/null
+	rm -f $(BDIR)/$(TARGET_FUNC) 2> /dev/null
+	rm -f $(BDIR)/$(TESTER) 2> /dev/null

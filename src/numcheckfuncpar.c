@@ -53,7 +53,6 @@ void count_up_checks(long n, int checked)
     pthread_mutex_lock(&mutex);
     bytes[n] += 1 << 5;
     bytes[n] += checked;
-        // SIGNAL
     pthread_mutex_unlock(&mutex);
 }
 
