@@ -26,8 +26,12 @@ long match_some_test = 0,
      have_tripled_digits = 0,
      have_four_repetitions = 0;
 
-int thread_count = 6;
-pthread_mutex_t mutex;
+const int thread_count = 6;
+int current = -1;
+const int mutex_count = 10;
+pthread_mutex_t mutex_check[10];
+pthread_mutex_t mutex_join;
+pthread_cond_t calc_max;
 
 
 /* check_num: concentra todos os testes a serem aplicados a cada número.
@@ -48,27 +52,29 @@ void *update_maxes(void *data);
 unsigned char *bytes;
 unsigned char filter = 5 << 5; //mascara para validar que o numero passou pelos 5 testes.
 
+void all_checks_done(long n)
+{
+    if(bytes[n] >= filter){
+        pthread_mutex_lock(&mutex_join);
+        current = n;
+        pthread_mutex_unlock(&mutex_join);
+        pthread_cond_signal(&calc_max);
+    }
+}
+
 void count_up_checks(long n, int checked)
 {
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex_check[n % mutex_count]);
     bytes[n] += 1 << 5;
     bytes[n] += checked;
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex_check[n % mutex_count]);
+    all_checks_done(n);
 }
 
-int all_checks_done(long n)
-{
-    // pthread_mutex_lock(&mutex);
-    return (bytes[n] >= filter);
-    // pthread_mutex_unlock(&mutex);
-
-}
 
 int get_checked_amount(long n)
 {
-    // pthread_mutex_lock(&mutex);
     return bytes[n] - filter;
-    // pthread_mutex_unlock(&mutex);
 }
 
 int main( int argc, char* argv[] )
@@ -95,7 +101,11 @@ int main( int argc, char* argv[] )
         tmp=tmp/10;
     } while (tmp>0);
 
-    pthread_mutex_init(&mutex, NULL); // ninicia o mutex
+    for (thread = 0; thread < mutex_count; thread++){
+        pthread_mutex_init(&mutex_check[thread], NULL); // ninicia o mutex
+    }
+
+    pthread_mutex_init(&mutex_join, NULL); // ninicia o mutex
 
     pthread_t thread_handles[thread_count];
     struct problem *param;
@@ -227,7 +237,12 @@ void *update_maxes(void *data)
     int i,all;
 
     for (i=0;i<=param.n;++i) {
-        while ( !(all_checks_done(i))){}
+
+        pthread_mutex_lock(&mutex_join);
+        while ( i > current){
+             pthread_cond_wait(&calc_max, &mutex_join);
+        }
+        pthread_mutex_unlock(&mutex_join);
         all = get_checked_amount(i);
         if (all > 0) {
             match_some_test += 1; // nao preciso de mutex aqui pois so essa thread mexe nessa global
